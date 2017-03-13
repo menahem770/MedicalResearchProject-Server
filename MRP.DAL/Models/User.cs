@@ -1,4 +1,5 @@
 ﻿using AspNet.Identity.MongoDB;
+using MongoDB.Bson.Serialization.Attributes;
 using MRP.Common.DTO;
 using System;
 using System.Collections.Generic;

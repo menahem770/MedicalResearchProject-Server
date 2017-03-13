@@ -20,7 +20,7 @@ namespace MRP.DAL.Repositories
         public PatientsFormSchemaRepository()
         {
             _client = new MongoClient(ConfigurationManager.ConnectionStrings["Mongo"].ConnectionString);
-            _database = _client.GetDatabase("MRPDB"/*ConfigurationManager.AppSettings.Get("MRPDB")*/);
+            _database = _client.GetDatabase(ConfigurationManager.AppSettings.Get("MongoDbName"));
             _patientsSchema = _database.GetCollection<BsonDocument>("PatientsFormSchema");
         }
         public async Task<bool> SaveFirstSchema(string schema)

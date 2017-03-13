@@ -18,6 +18,6 @@ namespace MRP.Common.DTO
         public DateTime DischargeDate { get; set; }
         public DateTime InclusionDate { get; set; }
         public string General { get; set; }
-        public Dictionary<string, SymptomInfo> Symptoms { get; set; } = new Dictionary<string, SymptomInfo>();
+        public Dictionary<string, dynamic> Symptoms { get; set; } = new Dictionary<string, dynamic>();
     }
 }

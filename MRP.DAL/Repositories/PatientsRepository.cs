@@ -12,6 +12,8 @@ using Microsoft.AspNet.Identity;
 using System.Configuration;
 using MRP.DAL.Services;
 using System.Reflection;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson;
 
 namespace MRP.DAL.Repositories
 {
@@ -24,7 +26,7 @@ namespace MRP.DAL.Repositories
         public PatientsRepository()
         {
             _client = new MongoClient(ConfigurationManager.ConnectionStrings["Mongo"].ConnectionString);
-            _database = _client.GetDatabase("MRPDB"/*ConfigurationManager.AppSettings.Get("MRPDB")*/);
+            _database = _client.GetDatabase(ConfigurationManager.AppSettings.Get("MongoDbName"));
             _patients = _database.GetCollection<Patient>("Patients");
         }
 
@@ -36,7 +38,7 @@ namespace MRP.DAL.Repositories
                 await _patients.UpdateOneAsync(p => p.PatientId == diagnosis.PatientId, update);
                 return true;
             }
-            catch (Exception) { return false; }
+            catch (Exception ex) { return false; }
         }
 
         public async Task<bool> AddPatient(PatientDTO patient)
@@ -52,7 +54,7 @@ namespace MRP.DAL.Repositories
         public async Task<bool> EditPatientInfo(PatientDTO patient)
         {
             Patient clientPatient = patient.ConvertToModel();
-            List<Patient> dbPatient = await _patients.Find(p => p.PatientId == clientPatient.PatientId).ToListAsync();
+            Patient dbPatient = _patients.Find(p => p.PatientId == clientPatient.PatientId).First();
             var updates = new List<UpdateDefinition<Patient>>();
             updates.Add(Builders<Patient>.Update.CurrentDate("LastModified"));
             string[] unchanged = { "Id", "PatientId", "LastModified", "Diagnosis" };
@@ -62,7 +64,7 @@ namespace MRP.DAL.Repositories
                 if (propertyInfo.CanRead)
                 {
                     object firstValue = propertyInfo.GetValue(clientPatient);
-                    object secondValue = propertyInfo.GetValue(dbPatient[0]);
+                    object secondValue = propertyInfo.GetValue(dbPatient);
                     if (!Equals(firstValue, secondValue))
                     {
                         updates.Add(Builders<Patient>.Update.Set(propertyInfo.Name, firstValue));
@@ -73,6 +75,19 @@ namespace MRP.DAL.Repositories
             {
                 var update = Builders<Patient>.Update.Combine(updates);
                 await _patients.UpdateOneAsync(p => p.PatientId == clientPatient.PatientId, update);
+                return true;
+            }
+            catch (Exception ex) { throw ex; }
+        }
+
+        public async Task<bool> EditDiagnosis(PatientDiagnosisDTO diagnosis)
+        {
+            PatientDiagnosis clientDiagnosis = diagnosis.ConvertToModel();
+            try
+            {
+                await _patients.FindOneAndUpdateAsync(p => 
+                    p.PatientId == diagnosis.PatientId && p.Diagnosis.Any(d => d.Id == diagnosis.Id),
+                    Builders<Patient>.Update.Set(p => p.Diagnosis.ElementAt(-1), clientDiagnosis));
                 return true;
             }
             catch (Exception ex) { throw ex; }

@@ -35,6 +35,10 @@ namespace MRP.BL
             PatientDiagnosisDTO diagnosis = await GetSymptomsFromRequest(requestContent);
             return await _pRep.AddDiagnosis(diagnosis);
         }
+        public Task<bool> EditDiagnosis(PatientDiagnosisDTO diagnosis)
+        {
+            return _pRep.EditDiagnosis(diagnosis);
+        }
 
         public Task<bool> EditPatient(PatientDTO patient)
         {
@@ -46,17 +50,17 @@ namespace MRP.BL
             PatientDiagnosisDTO diagnosis = new PatientDiagnosisDTO();
             await Task.Factory.StartNew(() =>
             {
-                dynamic json = JValue.Parse(requestContent);
+                dynamic json = JToken.Parse(requestContent);
                 dynamic symptoms = json.Symptoms;
                 json.Symptoms = null;
                 string str = JsonConvert.SerializeObject(json);
                 diagnosis = JsonConvert.DeserializeObject<PatientDiagnosisDTO>(str);
-                diagnosis.Symptoms = new Dictionary<string, SymptomInfo>();
+                diagnosis.Symptoms = new Dictionary<string, dynamic>();
                 foreach (var s in symptoms)
                 {
                     str = JsonConvert.SerializeObject(s.Symptom);
-                    SymptomInfo info = JsonConvert.DeserializeObject<SymptomInfo>(str);
-                    diagnosis.Symptoms.Add(info.SymptomName, info);
+                    dynamic obj = JsonConvert.DeserializeObject<dynamic>(str);
+                    diagnosis.Symptoms.Add(s.Key.ToString(), obj);
                 }
             });
             return diagnosis;

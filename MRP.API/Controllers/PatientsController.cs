@@ -57,7 +57,13 @@ namespace MRP.API.Controllers
         [Route("EditPatient"),HttpPut]
         public async Task<IHttpActionResult> EditPatient([FromBody]PatientDTO patient)
         {
-            return await _manager.EditPatient(patient) ? Created<PatientDTO>("", null) : (IHttpActionResult)InternalServerError();
+            return await _manager.EditPatient(patient) ? Ok() : (IHttpActionResult)InternalServerError();
+        }
+
+        [Route("EditDiagnosis"), HttpPut]
+        public async Task<IHttpActionResult> EditDiagnosis([FromBody]PatientDiagnosisDTO diagnosis)
+        {
+            return await _manager.EditDiagnosis(diagnosis) ? Ok() : (IHttpActionResult)InternalServerError();
         }
     }
 }

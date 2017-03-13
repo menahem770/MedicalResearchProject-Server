@@ -25,7 +25,7 @@ namespace MRP.DAL.Repositories
         public AuthRepository()
         {
             _client = new MongoClient(ConfigurationManager.ConnectionStrings["Mongo"].ConnectionString);
-            _database = _client.GetDatabase("MRPDB"/*ConfigurationManager.AppSettings.Get("MRPDB")*/);
+            _database = _client.GetDatabase(ConfigurationManager.AppSettings.Get("MongoDbName"));
             _users = _database.GetCollection<User>("AspNetUsers");
             _store = new UserStore<User>(_users);
             _userManager = new UserManager<User>(_store);
@@ -36,7 +36,7 @@ namespace MRP.DAL.Repositories
         public async Task<UserDTO> Login(string username, string password)
         {
             User user = await _userManager.FindAsync(username, password);
-            return user.ConvertToDTO();
+            return user?.ConvertToDTO();
         }
 
         public async Task<IdentityResult> Register(RegistrationInfo regInfo)

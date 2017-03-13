@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 using MRP.Common.DTO;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ namespace MRP.DAL.Models
 {
     public class PatientDiagnosis
     {
-        [BsonRepresentation(BsonType.ObjectId)]
+        [BsonId,BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = "";
         public string PatientId { get; set; }
         public string DoctorId { get; set; }
@@ -19,6 +20,7 @@ namespace MRP.DAL.Models
         public DateTime DischargeDate { get; set; }
         public DateTime InclusionDate { get; set; }
         public string General { get; set; }
-        public Dictionary<string,SymptomInfo> Symptoms { get; set; } = new Dictionary<string, SymptomInfo>();
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
+        public Dictionary<string,dynamic> Symptoms { get; set; } = new Dictionary<string, dynamic>();
     }
 }

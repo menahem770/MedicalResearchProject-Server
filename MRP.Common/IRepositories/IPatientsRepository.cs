@@ -13,5 +13,6 @@ namespace MRP.Common.IRepositories
         Task<bool> AddPatient(PatientDTO patient);
         Task<bool> AddDiagnosis(PatientDiagnosisDTO diagnosis);
         Task<bool> EditPatientInfo(PatientDTO patient);
+        Task<bool> EditDiagnosis(PatientDiagnosisDTO diagnosis);
     }
 }

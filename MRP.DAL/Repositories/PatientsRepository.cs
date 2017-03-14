@@ -33,30 +33,21 @@ namespace MRP.DAL.Repositories
         public async Task<bool> AddDiagnosis(PatientDiagnosisDTO diagnosis)
         {
             var update = Builders<Patient>.Update.CurrentDate("LastModified").AddToSet(p => p.Diagnosis, diagnosis.ConvertToModel());
-            try
-            {
-                await _patients.UpdateOneAsync(p => p.PatientId == diagnosis.PatientId, update);
-                return true;
-            }
-            catch (Exception ex) { return false; }
+            var res = await _patients.UpdateOneAsync(p => p.PatientId == diagnosis.PatientId, update);
+            return res.IsAcknowledged;
         }
 
         public async Task<bool> AddPatient(PatientDTO patient)
         {
-            try
-            {
-                await _patients.InsertOneAsync(patient.ConvertToModel());
-                return true;
-            }
-            catch (Exception ex) { throw ex; }
+            await _patients.InsertOneAsync(patient.ConvertToModel());
+            return true;
         }
 
-        public async Task<bool> EditPatientInfo(PatientDTO patient)
+        public async Task<PatientDTO> EditPatientInfo(PatientDTO patient)
         {
             Patient clientPatient = patient.ConvertToModel();
             Patient dbPatient = _patients.Find(p => p.PatientId == clientPatient.PatientId).First();
-            var updates = new List<UpdateDefinition<Patient>>();
-            updates.Add(Builders<Patient>.Update.CurrentDate("LastModified"));
+            var updates = new List<UpdateDefinition<Patient>> { Builders<Patient>.Update.CurrentDate("LastModified") };
             string[] unchanged = { "Id", "PatientId", "LastModified", "Diagnosis" };
             IEnumerable<PropertyInfo> properties = typeof(Patient).GetProperties().Where(p => !unchanged.Contains(p.Name));
             foreach (PropertyInfo propertyInfo in properties)
@@ -71,41 +62,25 @@ namespace MRP.DAL.Repositories
                     }
                 }
             }
-            try
-            {
-                var update = Builders<Patient>.Update.Combine(updates);
-                await _patients.UpdateOneAsync(p => p.PatientId == clientPatient.PatientId, update);
-                return true;
-            }
-            catch (Exception ex) { throw ex; }
+            var resPatient = await _patients.FindOneAndUpdateAsync(p => p.PatientId == clientPatient.PatientId, Builders<Patient>.Update.Combine(updates));
+            return resPatient.ConvertToDTO();
         }
 
-        public async Task<bool> EditDiagnosis(PatientDiagnosisDTO diagnosis)
+        public async Task<PatientDTO> EditDiagnosis(PatientDiagnosisDTO diagnosis)
         {
-            PatientDiagnosis clientDiagnosis = diagnosis.ConvertToModel();
-            try
-            {
-                await _patients.FindOneAndUpdateAsync(p => 
+            var patient = await _patients.FindOneAndUpdateAsync(p =>
                     p.PatientId == diagnosis.PatientId && p.Diagnosis.Any(d => d.Id == diagnosis.Id),
-                    Builders<Patient>.Update.Set(p => p.Diagnosis.ElementAt(-1), clientDiagnosis));
-                return true;
-            }
-            catch (Exception ex) { throw ex; }
+                    Builders<Patient>.Update.Set(p => p.Diagnosis.ElementAt(-1), diagnosis.ConvertToModel()));
+            return patient.ConvertToDTO();
         }
 
         public async Task<IEnumerable<PatientDTO>> GetPatients(FindPatientModel model)
         {
             List<Patient> collection;
             if (!String.IsNullOrWhiteSpace(model.PatientId))
-            {
-                try
-                {
-                    collection = await _patients.Find(p => p.PatientId == model.PatientId).ToListAsync();
-                    return collection.ConvertToDTOExtension().ToList();
-                }
-                catch (Exception ex) { throw ex; }
-            }
-            collection = await _patients.Find(p => p.Name == model.Name).ToListAsync();
+                collection = await _patients.Find(p => p.PatientId == model.PatientId).ToListAsync();
+            else
+                collection = await _patients.Find(p => p.Name == model.Name).ToListAsync();
             return collection.ConvertToDTOExtension().ToList();
         }
     }

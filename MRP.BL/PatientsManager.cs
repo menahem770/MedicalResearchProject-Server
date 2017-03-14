@@ -30,41 +30,40 @@ namespace MRP.BL
             return _pRep.AddPatient(patient);
         }
 
-        public async Task<bool> AddDiagnosis(string requestContent)
+        public async Task<bool> AddDiagnosis(PatientDiagnosisDTO diagnosis)
         {
-            PatientDiagnosisDTO diagnosis = await GetSymptomsFromRequest(requestContent);
             return await _pRep.AddDiagnosis(diagnosis);
         }
-        public Task<bool> EditDiagnosis(PatientDiagnosisDTO diagnosis)
+        public Task<PatientDTO> EditDiagnosis(PatientDiagnosisDTO diagnosis)
         {
             return _pRep.EditDiagnosis(diagnosis);
         }
 
-        public Task<bool> EditPatient(PatientDTO patient)
+        public Task<PatientDTO> EditPatient(PatientDTO patient)
         {
             return _pRep.EditPatientInfo(patient);
         }
 
-        private async Task<PatientDiagnosisDTO> GetSymptomsFromRequest(string requestContent)
-        {
-            PatientDiagnosisDTO diagnosis = new PatientDiagnosisDTO();
-            await Task.Factory.StartNew(() =>
-            {
-                dynamic json = JToken.Parse(requestContent);
-                dynamic symptoms = json.Symptoms;
-                json.Symptoms = null;
-                string str = JsonConvert.SerializeObject(json);
-                diagnosis = JsonConvert.DeserializeObject<PatientDiagnosisDTO>(str);
-                diagnosis.Symptoms = new Dictionary<string, dynamic>();
-                foreach (var s in symptoms)
-                {
-                    str = JsonConvert.SerializeObject(s.Symptom);
-                    dynamic obj = JsonConvert.DeserializeObject<dynamic>(str);
-                    diagnosis.Symptoms.Add(s.Key.ToString(), obj);
-                }
-            });
-            return diagnosis;
-        }
+        //private async Task<PatientDiagnosisDTO> GetSymptomsFromRequest(string requestContent)
+        //{
+        //    PatientDiagnosisDTO diagnosis = new PatientDiagnosisDTO();
+        //    await Task.Factory.StartNew(() =>
+        //    {
+        //        dynamic json = JToken.Parse(requestContent);
+        //        dynamic symptoms = json.Symptoms;
+        //        json.Symptoms = null;
+        //        string str = JsonConvert.SerializeObject(json);
+        //        diagnosis = JsonConvert.DeserializeObject<PatientDiagnosisDTO>(str);
+        //        diagnosis.Symptoms = new Dictionary<string, dynamic>();
+        //        foreach (var s in symptoms)
+        //        {
+        //            str = JsonConvert.SerializeObject(s.Symptom);
+        //            dynamic obj = JsonConvert.DeserializeObject<dynamic>(str);
+        //            diagnosis.Symptoms.Add(s.Key.ToString(), obj);
+        //        }
+        //    });
+        //    return diagnosis;
+        //}
 
     }
 }

@@ -8,7 +8,7 @@ namespace MRP.Common.DTO
 {
     public class PatientDiagnosisDTO
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string PatientId { get; set; }
         public string DoctorId { get; set; }
         public string DoctorName { get; set; }

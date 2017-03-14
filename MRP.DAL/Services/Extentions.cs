@@ -92,7 +92,7 @@ namespace MRP.DAL.Services
     {
         public static UserDTO ConvertToDTO(this User u)
         {
-            return new UserDTO
+            return u != null ? new UserDTO
             {
                 Id = u.Id,
                 UserId = u.UserId,
@@ -104,7 +104,7 @@ namespace MRP.DAL.Services
                 Roles = u.Roles,
                 LicenceID = u.LicenceID,
                 Institutions = u.Institutions.ConvertToDTOExtension().ToList()
-            };
+            } : null;
         }
     }
 
@@ -112,7 +112,7 @@ namespace MRP.DAL.Services
     {
         public static PatientDTO ConvertToDTO(this Patient p)
         {
-            return new PatientDTO
+            return p != null ? new PatientDTO
             {
                 Id = p.Id,
                 PatientId = p.PatientId,
@@ -124,12 +124,12 @@ namespace MRP.DAL.Services
                 General = p.General,
                 LastModified = p.LastModified,
                 Diagnosis = p.Diagnosis.ConvertToDTOExtension().ToList()
-            };
+            } : null;
         }
 
         public static PatientDiagnosisDTO ConvertToDTO(this PatientDiagnosis d)
         {
-            return new PatientDiagnosisDTO
+            return d != null ? new PatientDiagnosisDTO
             {
                 Id = d.Id,
                 PatientId = d.PatientId,
@@ -142,17 +142,17 @@ namespace MRP.DAL.Services
                 InclusionDate = d.InclusionDate,
                 General = d.General,
                 Symptoms = d.Symptoms
-            };
+            } : null;
         }
 
         public static MedicalInstitutionDTO ConvertToDTO(this MedicalInstitution ins)
         {
-            return new MedicalInstitutionDTO { Id = ins.Id, Name = ins.Name };
+            return ins != null ? new MedicalInstitutionDTO { Id = ins.Id, Name = ins.Name } : null;
         }
 
         public static Patient ConvertToModel(this PatientDTO p)
         {
-            return new Patient
+            return p != null ? new Patient
             {
                 Id = p.Id,
                 PatientId = p.PatientId,
@@ -164,12 +164,12 @@ namespace MRP.DAL.Services
                 General = p.General,
                 LastModified = p.LastModified,
                 Diagnosis = p.Diagnosis.ConvertToModelExtension().ToList()
-            };
+            } : null;
         }
 
         public static PatientDiagnosis ConvertToModel(this PatientDiagnosisDTO d)
         {
-            return new PatientDiagnosis
+            return d != null ? new PatientDiagnosis
             {
                 Id = d.Id,
                 PatientId = d.PatientId,
@@ -182,12 +182,12 @@ namespace MRP.DAL.Services
                 InclusionDate = d.InclusionDate,
                 General = d.General,
                 Symptoms = d.Symptoms
-            };
+            } : null;
         }
 
         public static MedicalInstitution ConvertToModel(this MedicalInstitutionDTO ins)
         {
-            return new MedicalInstitution { Id = ins.Id, Name = ins.Name };
+            return ins != null ? new MedicalInstitution { Id = ins.Id, Name = ins.Name } : null;
         }
     }
 

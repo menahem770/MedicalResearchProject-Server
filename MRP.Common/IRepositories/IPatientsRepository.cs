@@ -12,7 +12,7 @@ namespace MRP.Common.IRepositories
         Task<IEnumerable<PatientDTO>> GetPatients(FindPatientModel model);
         Task<bool> AddPatient(PatientDTO patient);
         Task<bool> AddDiagnosis(PatientDiagnosisDTO diagnosis);
-        Task<bool> EditPatientInfo(PatientDTO patient);
-        Task<bool> EditDiagnosis(PatientDiagnosisDTO diagnosis);
+        Task<PatientDTO> EditPatientInfo(PatientDTO patient);
+        Task<PatientDTO> EditDiagnosis(PatientDiagnosisDTO diagnosis);
     }
 }

@@ -37,33 +37,42 @@ namespace MRP.API.Controllers
         {
             try
             {
-                await _manager.AddPateint(patient);
-                return Ok();
+                return await _manager.AddPateint(patient) ? Created<PatientDiagnosisDTO>("", null) : (IHttpActionResult)BadRequest();
             }
-            catch (Exception ex)
-            {
-                return new BadRequestErrorMessageResult(ex.Message,null);
-            }
+            catch (Exception ex) { return InternalServerError(ex); }
         }
 
-        [Route("AddDiagnosis"),HttpPut]
-        public async Task<IHttpActionResult> AddDiagnosis()
+        [Route("AddDiagnosis"),HttpPost]
+        public async Task<IHttpActionResult> AddDiagnosis([FromBody]PatientDiagnosisDTO diagnosis)
         {
-            HttpContent requestContent = Request.Content;
-            string jsonContent = requestContent.ReadAsStringAsync().Result;
-            return await _manager.AddDiagnosis(jsonContent) ? Created<PatientDiagnosisDTO>("", null) : (IHttpActionResult)InternalServerError();
+            try
+            {
+                return await _manager.AddDiagnosis(diagnosis) ? Created<PatientDiagnosisDTO>("",null) : (IHttpActionResult)BadRequest();
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
+            
         }
 
         [Route("EditPatient"),HttpPut]
         public async Task<IHttpActionResult> EditPatient([FromBody]PatientDTO patient)
         {
-            return await _manager.EditPatient(patient) ? Ok() : (IHttpActionResult)InternalServerError();
+            try
+            {
+                var p = await _manager.EditPatient(patient);
+                return p != null ? Ok(p) : (IHttpActionResult)BadRequest();
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
         }
 
         [Route("EditDiagnosis"), HttpPut]
         public async Task<IHttpActionResult> EditDiagnosis([FromBody]PatientDiagnosisDTO diagnosis)
         {
-            return await _manager.EditDiagnosis(diagnosis) ? Ok() : (IHttpActionResult)InternalServerError();
+            try
+            {
+                var patient = await _manager.EditDiagnosis(diagnosis);
+                return patient != null ? Ok(patient) : (IHttpActionResult)BadRequest();
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
         }
     }
 }

@@ -22,7 +22,6 @@ namespace MRP.BL
             authRep = new AuthRepository();
             userRep = new UsersRepository();
         }
-
         
         public Task<UserDTO> Login(string username, string password)
         {
@@ -44,34 +43,9 @@ namespace MRP.BL
             return userRep.GetUserAsync(username);
         }
 
-
-        //public IEnumerable<UserDTO> GetUsers()
-        //{
-        //    return rep.GetUsers();
-        //}
-
-        //public UserDTO GetUsers(int id)
-        //{
-        //    return rep.GetUser(id);
-        //}
-
-        //public bool EditUser(int id, EditUserInfo uInfo)
-        //{
-        //    return rep.EditUser(id, uInfo);
-        //}
-        //public Task<UserDTO> FindUser(string username, string password)
-        //{
-        //    return rep.FindUser(username, password);
-        //}
-
-        //public bool DeleteUser(int id)
-        //{
-        //    return rep.DeleteUser(id);
-        //}
-
-        //public PasswordRecoveryResponse RecoverPassword(RecoveryInfo recInfo)
-        //{
-        //    return rep.RecoverPassword(recInfo);
-        //}
+        public Task<bool> RecoverPasswordAsync(RecoveryInfo recInfo)
+        {
+            return userRep.RecoverPasswordAsync(recInfo);
+        }
     }
 }

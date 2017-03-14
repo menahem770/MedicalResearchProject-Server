@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNet.Identity;
-using MRP.API.Models;
 using MRP.API.Providers;
 using MRP.BL;
 using MRP.Common.DTO;
@@ -21,7 +20,7 @@ namespace MRP.API.Controllers
         }
 
         [AllowAnonymous]
-        [Route("Register")]
+        [Route("Register"),HttpPost]
         public async Task<IHttpActionResult> Register([FromBody]RegistrationInfo info)
         {
             if (!ModelState.IsValid)
@@ -41,26 +40,32 @@ namespace MRP.API.Controllers
             return Created<UserDTO>("",null);
         }
 
-        [Route("GetAllUsers")]
+        [Route("GetAllUsers"),HttpGet]
         public async Task<JsonResult<IEnumerable<UserDTO>>> GetAllUsersAsync()
         {
             IEnumerable<UserDTO> users = await _manager.GetAllUsersAsync();
             return Json(users);
         }
 
-        [Route("GetUser")]
+        [Route("GetUser"),HttpGet]
         public async Task<JsonResult<UserDTO>> GetUserAsync([FromUri]string username)
         {
             UserDTO user = await _manager.GetUserAsync(username);
             return Json(user);
         }
 
-        [Route("GetUserByToken")]
+        [Route("GetUserByToken"),HttpPost]
         public async Task<JsonResult<UserDTO>> GetUserByTokenAsync([FromBody]string token)
         {
             string un = RequestContext.Principal.Identity.GetUserName();
             UserDTO user = await _manager.GetUserAsync(un);
             return Json(user);
+        }
+
+        [Route("RecoverPassword"), HttpPost]
+        public async Task<IHttpActionResult> RecoverPassword([FromBody]RecoveryInfo recInfo)
+        {
+            return await _manager.RecoverPasswordAsync(recInfo) ? Ok() : (IHttpActionResult)InternalServerError();
         }
 
         private IHttpActionResult GetErrorResult(IdentityResult result)

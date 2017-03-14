@@ -11,5 +11,6 @@ namespace MRP.Common.IRepositories
     {
         Task<IEnumerable<UserDTO>> GetAllUsersAsync();
         Task<UserDTO> GetUserAsync(string username);
+        Task<bool> RecoverPasswordAsync(RecoveryInfo recInfo);
     }
 }

@@ -59,14 +59,18 @@ namespace MRP.DAL.Repositories
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    MailMessage mail = new MailMessage(ConfigurationManager.AppSettings.Get("fromEmail"), user.Email);
-                    SmtpClient client = new SmtpClient();
-                    client.Port = 25;
-                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    client.UseDefaultCredentials = false;
-                    client.Host = ConfigurationManager.AppSettings.Get("smtpHost");
-                    mail.Subject = "MRP Password Recovery";                   
-                    mail.Body = String.Format("your temporary password is: {0}",pwd);
+                    SmtpClient client = new SmtpClient()
+                    {
+                        Port = 25,
+                        DeliveryMethod = SmtpDeliveryMethod.Network,
+                        UseDefaultCredentials = false,
+                        Host = ConfigurationManager.AppSettings.Get("smtpHost")
+                    };
+                    MailMessage mail = new MailMessage(ConfigurationManager.AppSettings.Get("fromEmail"), user.Email)
+                    {
+                        Subject = "MRP Password Recovery",
+                        Body = String.Format("your temporary password is: {0}", pwd)
+                    };
                     client.Send(mail);
                 });
                 return true;

@@ -26,10 +26,14 @@ namespace MRP.API.Controllers
         }
 
         [Route("GetPatients"),HttpPost]
-        public async Task<JsonResult<IEnumerable<PatientDTO>>> GetPatients([FromBody]FindPatientModel model)
+        public async Task<IHttpActionResult> GetPatients([FromBody]FindPatientModel model)
         {
-            IEnumerable<PatientDTO> patients = await _manager.GetPatients(model);
-            return Json(patients);
+            try
+            {
+                IEnumerable<PatientDTO> patients = await _manager.GetPatients(model);
+                return patients.Count() > 0 ? Json(patients) : (IHttpActionResult)BadRequest("no patients found!");
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
         }
 
         [Route("AddPatient"),HttpPost]
@@ -37,7 +41,7 @@ namespace MRP.API.Controllers
         {
             try
             {
-                return await _manager.AddPateint(patient) ? Created<PatientDiagnosisDTO>("", null) : (IHttpActionResult)BadRequest();
+                return await _manager.AddPateint(patient) ? Created<PatientDiagnosisDTO>("", null) : (IHttpActionResult)BadRequest("changes not excepted!");
             }
             catch (Exception ex) { return InternalServerError(ex); }
         }
@@ -47,7 +51,7 @@ namespace MRP.API.Controllers
         {
             try
             {
-                return await _manager.AddDiagnosis(diagnosis) ? Created<PatientDiagnosisDTO>("",null) : (IHttpActionResult)BadRequest();
+                return await _manager.AddDiagnosis(diagnosis) ? Created<PatientDiagnosisDTO>("",null) : (IHttpActionResult)BadRequest("changes not excepted!");
             }
             catch (Exception ex) { return InternalServerError(ex); }
             
@@ -59,18 +63,18 @@ namespace MRP.API.Controllers
             try
             {
                 var p = await _manager.EditPatient(patient);
-                return p != null ? Ok(p) : (IHttpActionResult)BadRequest();
+                return p != null ? Ok(p) : (IHttpActionResult)BadRequest("changes not excepted!");
             }
             catch (Exception ex) { return InternalServerError(ex); }
         }
 
-        [Route("EditDiagnosis"), HttpPut]
+        [Route("EditDiagnosis"),HttpPut]
         public async Task<IHttpActionResult> EditDiagnosis([FromBody]PatientDiagnosisDTO diagnosis)
         {
             try
             {
                 var patient = await _manager.EditDiagnosis(diagnosis);
-                return patient != null ? Ok(patient) : (IHttpActionResult)BadRequest();
+                return patient != null ? Ok(patient) : (IHttpActionResult)BadRequest("changes not excepted!");
             }
             catch (Exception ex) { return InternalServerError(ex); }
         }

@@ -13,7 +13,7 @@ namespace MRP.API.Providers
     {
         public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
         {            
-            context.Validated();
+            await Task.Factory.StartNew(() => context.Validated());
         }
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)

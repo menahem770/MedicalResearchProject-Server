@@ -26,23 +26,15 @@ namespace MRP.DAL.Repositories
         public async Task<bool> SaveFirstSchema(string schema)
         {
             List<BsonDocument> arr = BsonSerializer.Deserialize<BsonArray>(schema).Select(d => d.AsBsonDocument).ToList<BsonDocument>();
-            try
-            {
-                await _patientsSchema.InsertManyAsync(arr);
-            }
-            catch (Exception ex) { return false; }
+            await _patientsSchema.InsertManyAsync(arr);
             return true;
         }
 
         public async Task<string> GetFirstSchema()
         {
-            try
-            {
-                var result = await _patientsSchema.Find(new BsonDocument())
-                    .Project(Builders<BsonDocument>.Projection.Exclude("_id")).ToListAsync();
-                return result.ToJson();
-            }
-            catch (Exception ex) { return null; }
+            List<BsonDocument> result = await _patientsSchema.Find(new BsonDocument())
+                .Project(Builders<BsonDocument>.Projection.Exclude("_id")).ToListAsync();
+            return result.ToJson();
         }
     }
 }

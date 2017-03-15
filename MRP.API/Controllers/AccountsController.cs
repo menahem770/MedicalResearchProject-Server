@@ -2,6 +2,7 @@
 using MRP.API.Providers;
 using MRP.BL;
 using MRP.Common.DTO;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -20,7 +21,7 @@ namespace MRP.API.Controllers
         }
 
         [AllowAnonymous]
-        [Route("Register"),HttpPost]
+        [Route("Register"), HttpPost]
         public async Task<IHttpActionResult> Register([FromBody]RegistrationInfo info)
         {
             if (!ModelState.IsValid)
@@ -37,35 +38,51 @@ namespace MRP.API.Controllers
                 return errorResult;
             }
 
-            return Created<UserDTO>("",null);
+            return Created<UserDTO>("", null);
         }
 
-        [Route("GetAllUsers"),HttpGet]
-        public async Task<JsonResult<IEnumerable<UserDTO>>> GetAllUsersAsync()
+        [Route("GetAllUsers"), HttpGet]
+        public async Task<IHttpActionResult> GetAllUsersAsync()
         {
-            IEnumerable<UserDTO> users = await _manager.GetAllUsersAsync();
-            return Json(users);
-        }
+            try
+            {
+                IEnumerable<UserDTO> users = await _manager.GetAllUsersAsync();
+                return users.GetEnumerator().Current != null ? Json(users) : (IHttpActionResult)BadRequest("no users found!"); ;
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
+        } 
 
-        [Route("GetUser"),HttpGet]
-        public async Task<JsonResult<UserDTO>> GetUserAsync([FromUri]string username)
+        [Route("GetUser"), HttpGet]
+        public async Task<IHttpActionResult> GetUserAsync([FromUri]string username)
         {
-            UserDTO user = await _manager.GetUserAsync(username);
-            return Json(user);
+            try
+            {
+                UserDTO user = await _manager.GetUserAsync(username);
+                return user != null ? Json(user) : (IHttpActionResult)BadRequest("no user found!");
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
         }
 
-        [Route("GetUserByToken"),HttpPost]
-        public async Task<JsonResult<UserDTO>> GetUserByTokenAsync([FromBody]string token)
+        [Route("GetUserByToken"), HttpPost]
+        public async Task<IHttpActionResult> GetUserByTokenAsync([FromBody]string token)
         {
             string un = RequestContext.Principal.Identity.GetUserName();
-            UserDTO user = await _manager.GetUserAsync(un);
-            return Json(user);
+            try
+            {
+                UserDTO user = await _manager.GetUserAsync(un);
+                return user != null ? Json(user) : (IHttpActionResult)BadRequest("no user found!");
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
         }
 
         [Route("RecoverPassword"), HttpPost]
         public async Task<IHttpActionResult> RecoverPassword([FromBody]RecoveryInfo recInfo)
         {
-            return await _manager.RecoverPasswordAsync(recInfo) ? Ok() : (IHttpActionResult)InternalServerError();
+            try
+            {
+                return await _manager.RecoverPasswordAsync(recInfo) ? Ok() : (IHttpActionResult)BadRequest("no user found!");
+            }
+            catch (Exception ex) { return InternalServerError(ex); }
         }
 
         private IHttpActionResult GetErrorResult(IdentityResult result)

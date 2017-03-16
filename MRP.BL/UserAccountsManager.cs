@@ -45,7 +45,7 @@ namespace MRP.BL
 
         public Task<bool> RecoverPasswordAsync(RecoveryInfo recInfo)
         {
-            return userRep.RecoverPasswordAsync(recInfo);
+            return authRep.RecoverPasswordAsync(recInfo);
         }
     }
 }

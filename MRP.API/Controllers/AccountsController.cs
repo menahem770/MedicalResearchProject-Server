@@ -75,6 +75,7 @@ namespace MRP.API.Controllers
             catch (Exception ex) { return InternalServerError(ex); }
         }
 
+        [AllowAnonymous]
         [Route("RecoverPassword"), HttpPost]
         public async Task<IHttpActionResult> RecoverPassword([FromBody]RecoveryInfo recInfo)
         {

@@ -8,6 +8,8 @@ using MongoDB.Driver;
 using AspNet.Identity.MongoDB;
 using MRP.Common.IRepositories;
 using System.Configuration;
+using System.Net.Mail;
+using System;
 
 namespace MRP.DAL.Repositories
 {
@@ -16,10 +18,10 @@ namespace MRP.DAL.Repositories
         MongoClient _client;
         IMongoDatabase _database;
         IMongoCollection<User> _users;
-        //IMongoCollection<IdentityRole> _roles;
         UserStore<User> _store;
-        //RoleStore<IdentityRole> _roleStore;
         UserManager<User> _userManager;
+        //IMongoCollection<IdentityRole> _roles;
+        //RoleStore<IdentityRole> _roleStore;
 
 
         public AuthRepository()
@@ -52,6 +54,36 @@ namespace MRP.DAL.Repositories
                 Institutions = regInfo.Institutions.ConvertToModelExtension().ToList()
             };
             return await _userManager.CreateAsync(user, regInfo.Password);
+        }
+
+        public async Task<bool> RecoverPasswordAsync(RecoveryInfo recInfo)
+        {
+            string pwd = RandomPasswordGenerator.GeneratePassword(8);
+            string hashPwd = _userManager.PasswordHasher.HashPassword(pwd);
+            var update = Builders<User>.Update.Set(u => u.PasswordHash, hashPwd);
+            User user = await _users.FindOneAndUpdateAsync(u => u.Email == recInfo.EmailAddress && u.DateOfBirth == recInfo.DateOfBirth, update);
+            if (user != null)
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    SmtpClient client = new SmtpClient()
+                    {
+                        Port = 25,
+                        DeliveryMethod = SmtpDeliveryMethod.Network,
+                        UseDefaultCredentials = false,
+                        Host = ConfigurationManager.AppSettings.Get("smtpHost")
+                    };
+                    MailMessage mail = new MailMessage(ConfigurationManager.AppSettings.Get("fromEmail"), user.Email)
+                    {
+                        Subject = "MRP Password Recovery",
+                        Body = String.Format("your temporary password is: {0}", pwd)
+                    };
+                    client.Send(mail);
+                });
+                return true;
+            }
+            else
+                return false;
         }
 
         private async Task<UserDTO> FindUser(string username, string password)
